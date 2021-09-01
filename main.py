@@ -21,12 +21,12 @@ def signal_handler(sig, frame):
 
 
 # Open the video device.
-video = v4l2capture.Video_device("/dev/video0")
+video = v4l2capture.Video_device("/dev/video4")
 
 # Suggest an image size to the device. The device may choose and
 # return another size if it doesn't support the suggested one.
 # size_x, size_y = video.set_format(1280, 1024)
-size_x, size_y = video.set_format(1200, 800)
+size_x, size_y = video.set_format(1920, 1080)
 print (size_x)
 print(size_y)
 # Create a buffer to store image data in. This must be done before
