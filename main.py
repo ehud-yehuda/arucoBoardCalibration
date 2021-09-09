@@ -8,8 +8,11 @@ import select
 import v4l2capture
 import numpy as np
 import cv2
+import cv2.aruco as aruco
+
 import time
 import signal
+
 
 
 def signal_handler(sig, frame):
@@ -21,7 +24,7 @@ def signal_handler(sig, frame):
 
 
 # Open the video device.
-video = v4l2capture.Video_device("/dev/video4")
+video = v4l2capture.Video_device("/dev/video0")
 
 # Suggest an image size to the device. The device may choose and
 # return another size if it doesn't support the suggested one.
@@ -51,6 +54,12 @@ out_uvc = cv2.VideoWriter(uvc_fn, fourcc_uvc, fps, (size_x, size_y), True)
 
 signal.signal(signal.SIGINT, signal_handler)
 
+#aruco parameters
+arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
+arucoParams = cv2.aruco.DetectorParameters_create()
+
+
+
 # The rest is easy :-)
 while True:
     try:
@@ -58,6 +67,16 @@ while True:
         select.select((video,), (), ())
         image_data = video.read_and_queue()
         image = np.array(Image.frombytes("RGB", (size_x, size_y), image_data))
+
+        #detect markers
+        (corners, ids, rejected) = cv2.aruco.detectMarkers(image, arucoDict,
+                                                           parameters=arucoParams)
+        try:
+            aruco.drawDetectedMarkers(image, corners, np.array(ids))
+        except Exception:
+            pass
+        print(ids)
+        print("*****")
         out_uvc.write(image)
         cv2.imshow('frame', image)
         cv2.waitKey(1)
